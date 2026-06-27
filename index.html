@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Informes de Evaluación — Educación Física | E. Roberto Ojeda Torres</title>
+  <meta name="description" content="Portal de Informes de Evaluación de Educación Física y Salud — Escuela Roberto Ojeda Torres, Reumén. Consulta las notas, nivel de logro, progreso motriz y retroalimentación pedagógica de tu estudiante.">
+  <meta name="theme-color" content="#FF6B6B">
+
+  <!-- Google Fonts: Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="login-mode">
+
+  <!-- ===================== LOGIN VIEW ===================== -->
+  <main id="login-view" class="view active" role="main" aria-label="Inicio de sesión">
+    <!-- Bubbles decorativos de fondo -->
+    <div class="bg-bubble b1" aria-hidden="true"></div>
+    <div class="bg-bubble b2" aria-hidden="true"></div>
+    <div class="bg-bubble b3" aria-hidden="true"></div>
+
+    <div class="login-card">
+      <!-- Logo e identidad -->
+      <div class="login-brand">
+        <img
+          src="https://i.ibb.co/W4b3PFrh/Logo-Transparente.png"
+          alt="Logo Escuela Roberto Ojeda Torres"
+          class="school-logo"
+          id="school-logo"
+          onerror="this.style.display='none'; document.getElementById('logo-fallback').style.display='flex';"
+        >
+        <div class="logo-fallback" id="logo-fallback" aria-hidden="true">🏃</div>
+        <div class="login-brand-text">
+          <h1>Informes de Evaluación</h1>
+          <p class="brand-subtitle">Educación Física y Salud</p>
+          <span class="brand-school">Escuela Roberto Ojeda Torres · 2026</span>
+        </div>
+      </div>
+
+      <!-- Separador -->
+      <div class="login-divider">
+        <span>Ingresa con el RUT de tu estudiante</span>
+      </div>
+
+      <!-- Formulario de login -->
+      <form id="login-form" novalidate>
+        <div class="input-group" id="rut-group">
+          <label for="rut-input" class="input-label">
+            <span class="label-icon" aria-hidden="true">🔑</span>
+            RUT del Estudiante
+          </label>
+          <div class="input-wrapper">
+            <input
+              type="text"
+              id="rut-input"
+              name="rut"
+              placeholder="Ej: 12345678-9"
+              autocomplete="off"
+              autocorrect="off"
+              autocapitalize="off"
+              spellcheck="false"
+              required
+              aria-label="RUT del estudiante"
+              aria-describedby="rut-hint"
+            >
+            <div class="input-border-anim" aria-hidden="true"></div>
+          </div>
+          <p id="rut-hint" class="input-hint">Sin puntos, con guión y dígito verificador</p>
+        </div>
+
+        <button type="submit" id="btn-login" class="btn-primary">
+          <span class="btn-text">Ingresar al Portal</span>
+          <span class="btn-icon" aria-hidden="true">→</span>
+          <div class="btn-loader hidden" aria-hidden="true"></div>
+        </button>
+
+        <p id="login-error" class="error-msg hidden" role="alert" aria-live="polite"></p>
+      </form>
+
+      <p class="login-footer">🔒 Solo lectura · Información segura</p>
+    </div>
+  </main>
+
+  <!-- ===================== DASHBOARD VIEW ===================== -->
+  <div id="dashboard-view" class="view hidden" aria-label="Panel del estudiante">
+
+    <!-- Header fijo -->
+    <header class="dash-header" id="dash-header">
+      <div class="dash-header-inner">
+        <div class="student-info">
+          <div class="student-avatar" id="student-avatar" aria-hidden="true"></div>
+          <div class="student-meta">
+            <h2 id="student-name" class="student-name">Cargando...</h2>
+            <p id="student-meta" class="student-detail">—</p>
+          </div>
+        </div>
+        <button id="btn-logout" class="btn-logout" aria-label="Cerrar sesión">
+          <span>Salir</span>
+          <span aria-hidden="true">↩</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Hero banner con resumen -->
+    <div class="dash-hero" id="dash-hero" aria-hidden="true">
+      <div class="hero-pattern" aria-hidden="true"></div>
+      <div class="hero-content">
+        <div class="hero-emoji" id="hero-emoji">🏃</div>
+        <div class="hero-text">
+          <p class="hero-greeting" id="hero-greeting">¡Hola!</p>
+          <p class="hero-label">Educación Física y Salud · 2026</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Estado de carga -->
+    <div id="dash-loading" class="loading-state" role="status" aria-live="polite">
+      <div class="loader-ring" aria-hidden="true">
+        <div class="ring-segment r1"></div>
+        <div class="ring-segment r2"></div>
+        <div class="ring-segment r3"></div>
+      </div>
+      <p class="loading-text">Cargando tus informes...</p>
+    </div>
+
+    <!-- Error de carga -->
+    <div id="dash-error" class="dash-error-state hidden" role="alert">
+      <div class="error-icon" aria-hidden="true">⚠️</div>
+      <p id="dash-error-msg" class="dash-error-msg">Error al cargar</p>
+      <button id="btn-retry" class="btn-retry">Reintentar</button>
+    </div>
+
+    <!-- Contenido principal del dashboard -->
+    <div id="dash-content" class="dash-content hidden">
+
+      <!-- Navegación por tabs -->
+      <nav class="tab-nav" role="tablist" aria-label="Secciones del informe">
+        <button
+          class="tab-btn active"
+          id="tab-btn-evaluaciones"
+          data-tab="evaluaciones"
+          role="tab"
+          aria-selected="true"
+          aria-controls="panel-evaluaciones"
+        >
+          <span class="tab-icon" aria-hidden="true">📊</span>
+          <span class="tab-label">Evaluaciones</span>
+        </button>
+        <button
+          class="tab-btn"
+          id="tab-btn-progreso"
+          data-tab="progreso"
+          role="tab"
+          aria-selected="false"
+          aria-controls="panel-progreso"
+        >
+          <span class="tab-icon" aria-hidden="true">📈</span>
+          <span class="tab-label">Mi Progreso</span>
+        </button>
+      </nav>
+
+      <!-- Tab 1: Evaluaciones -->
+      <section
+        id="panel-evaluaciones"
+        class="tab-panel active"
+        role="tabpanel"
+        aria-labelledby="tab-btn-evaluaciones"
+      >
+        <div id="evals-container" class="cards-grid"></div>
+      </section>
+
+      <!-- Tab 2: Progreso -->
+      <section
+        id="panel-progreso"
+        class="tab-panel hidden"
+        role="tabpanel"
+        aria-labelledby="tab-btn-progreso"
+      >
+        <div id="progreso-container" class="cards-grid"></div>
+      </section>
+
+    </div><!-- /dash-content -->
+
+  </div><!-- /dashboard-view -->
+
+  <script src="app.js"></script>
+</body>
+</html>
