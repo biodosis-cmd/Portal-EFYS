@@ -1312,6 +1312,100 @@ body.dashboard-mode {
   .score-ring-svg  { width: 76px; height: 76px; }
 }
 
-/* Custom Tooltip */
-.custom-tooltip { position: fixed; background: rgba(0, 0, 0, 0.85); color: #fff; padding: 6px 12px; border-radius: 6px; font-size: 13px; font-weight: 500; pointer-events: none; opacity: 0; transition: opacity 0.2s ease; z-index: 9999; transform: translate(-50%, -120%); white-space: nowrap; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
-.custom-tooltip.visible { opacity: 1; }
+/* Bottom Sheet — Info de puntos del gráfico */
+.bottom-sheet-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 9998;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
+}
+.bottom-sheet-overlay.visible {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.bottom-sheet {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  border-radius: 20px 20px 0 0;
+  padding: 0 20px 24px;
+  z-index: 9999;
+  transform: translateY(100%);
+  transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+  box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.12);
+  max-width: 560px;
+  margin: 0 auto;
+}
+.bottom-sheet.visible {
+  transform: translateY(0);
+}
+
+.bottom-sheet-handle {
+  width: 40px;
+  height: 5px;
+  background: #d1d5db;
+  border-radius: 99px;
+  margin: 10px auto 14px;
+}
+
+.bottom-sheet-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.bottom-sheet-close {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: #f3f4f6;
+  color: #6b7280;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+.bottom-sheet-close:hover {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.bottom-sheet-pct {
+  font-size: 28px;
+  font-weight: 800;
+  font-family: 'Outfit', sans-serif;
+  line-height: 1;
+}
+
+.bottom-sheet-criterio {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-dark);
+  line-height: 1.45;
+  margin-bottom: 6px;
+}
+
+.bottom-sheet-eval {
+  font-size: 13px;
+  color: var(--text-mid);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.bottom-sheet-eval-icon {
+  font-size: 15px;
+}
+

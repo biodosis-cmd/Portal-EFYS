@@ -45,34 +45,49 @@ let activeTab        = 'evaluaciones';
 let retryIdAlumno    = null;
 
 // ─────────────────────────────────────────────
-// CUSTOM TOOLTIP (Mobile & Desktop)
+// BOTTOM SHEET (Mobile & Desktop)
 // ─────────────────────────────────────────────
-const tooltipEl = document.createElement('div');
-tooltipEl.className = 'custom-tooltip';
-document.body.appendChild(tooltipEl);
+const bsOverlay = document.createElement('div');
+bsOverlay.className = 'bottom-sheet-overlay';
+document.body.appendChild(bsOverlay);
 
-window.showTooltip = function(e, text) {
-  tooltipEl.textContent = text;
-  tooltipEl.classList.add('visible');
-  
-  const x = e.clientX || (e.touches && e.touches[0].clientX);
-  const y = e.clientY || (e.touches && e.touches[0].clientY);
-  
-  if (x !== undefined && y !== undefined) {
-    tooltipEl.style.left = x + 'px';
-    tooltipEl.style.top = y + 'px';
-  }
+const bsSheet = document.createElement('div');
+bsSheet.className = 'bottom-sheet';
+bsSheet.innerHTML = `
+  <div class="bottom-sheet-handle"></div>
+  <div class="bottom-sheet-header">
+    <span class="bottom-sheet-pct" id="bs-pct"></span>
+    <button class="bottom-sheet-close" id="bs-close" aria-label="Cerrar">✕</button>
+  </div>
+  <div class="bottom-sheet-criterio" id="bs-criterio"></div>
+  <div class="bottom-sheet-eval">
+    <span class="bottom-sheet-eval-icon">📋</span>
+    <span id="bs-eval"></span>
+  </div>`;
+document.body.appendChild(bsSheet);
+
+function _bsOpen(criterio, pct, evalName) {
+  const pctNum = parseFloat(pct);
+  const color = pctNum >= 75 ? '#00b894' : pctNum >= 50 ? '#fdcb6e' : '#fc5c65';
+  document.getElementById('bs-pct').textContent = pct;
+  document.getElementById('bs-pct').style.color = color;
+  document.getElementById('bs-criterio').textContent = criterio;
+  document.getElementById('bs-eval').textContent = evalName;
+  bsOverlay.classList.add('visible');
+  bsSheet.classList.add('visible');
+}
+
+function _bsClose() {
+  bsOverlay.classList.remove('visible');
+  bsSheet.classList.remove('visible');
+}
+
+bsOverlay.addEventListener('click', _bsClose);
+document.getElementById('bs-close').addEventListener('click', _bsClose);
+
+window.showDotInfo = function(criterio, pct, evalName) {
+  _bsOpen(criterio, pct, evalName);
 };
-
-window.hideTooltip = function() {
-  tooltipEl.classList.remove('visible');
-};
-
-document.addEventListener('touchstart', (e) => {
-  if (e.target.tagName !== 'circle') {
-    hideTooltip();
-  }
-});
 
 // ─────────────────────────────────────────────
 // INIT
@@ -661,18 +676,18 @@ function buildLineChart(registros, tendencia) {
     + ` L${xOf(registros.length - 1).toFixed(1)},${(pad.t + cH).toFixed(1)}`
     + ` L${pad.l.toFixed(1)},${(pad.t + cH).toFixed(1)} Z`;
 
-  // Puntos con tooltip
+  // Puntos con Bottom Sheet
   const dots = registros.map((r, i) => {
     const x = xOf(i).toFixed(1);
     const y = yOf(r.porcentaje).toFixed(1);
     const dotColor = r.porcentaje >= 75 ? '#00b894' : r.porcentaje >= 50 ? '#fdcb6e' : '#fc5c65';
-    const tooltipText = r.criterio ? r.criterio : r.nombre_eval;
-    const escapedText = escHtml(tooltipText).replace(/'/g, "\\'");
+    const criterioText = (r.criterio || r.nombre_eval).replace(/'/g, "\\'");
+    const evalText = (r.nombre_eval || '').replace(/'/g, "\\'");
+    const pctText = r.porcentaje.toFixed(1) + '%';
     return `<circle cx="${x}" cy="${y}" r="8" fill="${dotColor}" stroke="white" stroke-width="2.5" 
       class="progreso-dot"
-      onmouseover="showTooltip(event, '${escapedText}: ${r.porcentaje.toFixed(1)}%')" 
-      onmouseout="hideTooltip()"
-      ontouchstart="showTooltip(event, '${escapedText}: ${r.porcentaje.toFixed(1)}%')"
+      onclick="showDotInfo('${criterioText}', '${pctText}', '${evalText}')"
+      ontouchstart="showDotInfo('${criterioText}', '${pctText}', '${evalText}')"
       style="cursor: pointer; pointer-events: all; -webkit-tap-highlight-color: transparent;">
     </circle>`;
   }).join('');
