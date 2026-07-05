@@ -636,8 +636,9 @@ function buildLineChart(registros, tendencia) {
     const x = xOf(i).toFixed(1);
     const y = yOf(r.porcentaje).toFixed(1);
     const dotColor = r.porcentaje >= 75 ? '#00b894' : r.porcentaje >= 50 ? '#fdcb6e' : '#fc5c65';
+    const tooltipText = r.criterio ? r.criterio : r.nombre_eval;
     return `<circle cx="${x}" cy="${y}" r="6" fill="${dotColor}" stroke="white" stroke-width="2.5">
-      <title>${r.nombre_eval}: ${r.porcentaje.toFixed(1)}%</title>
+      <title>${escHtml(tooltipText)}: ${r.porcentaje.toFixed(1)}%</title>
     </circle>`;
   }).join('');
 
