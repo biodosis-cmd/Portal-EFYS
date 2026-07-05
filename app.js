@@ -45,6 +45,36 @@ let activeTab        = 'evaluaciones';
 let retryIdAlumno    = null;
 
 // ─────────────────────────────────────────────
+// CUSTOM TOOLTIP (Mobile & Desktop)
+// ─────────────────────────────────────────────
+const tooltipEl = document.createElement('div');
+tooltipEl.className = 'custom-tooltip';
+document.body.appendChild(tooltipEl);
+
+window.showTooltip = function(e, text) {
+  tooltipEl.textContent = text;
+  tooltipEl.classList.add('visible');
+  
+  const x = e.clientX || (e.touches && e.touches[0].clientX);
+  const y = e.clientY || (e.touches && e.touches[0].clientY);
+  
+  if (x !== undefined && y !== undefined) {
+    tooltipEl.style.left = x + 'px';
+    tooltipEl.style.top = y + 'px';
+  }
+};
+
+window.hideTooltip = function() {
+  tooltipEl.classList.remove('visible');
+};
+
+document.addEventListener('touchstart', (e) => {
+  if (e.target.tagName !== 'circle') {
+    hideTooltip();
+  }
+});
+
+// ─────────────────────────────────────────────
 // INIT
 // ─────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
@@ -637,8 +667,13 @@ function buildLineChart(registros, tendencia) {
     const y = yOf(r.porcentaje).toFixed(1);
     const dotColor = r.porcentaje >= 75 ? '#00b894' : r.porcentaje >= 50 ? '#fdcb6e' : '#fc5c65';
     const tooltipText = r.criterio ? r.criterio : r.nombre_eval;
-    return `<circle cx="${x}" cy="${y}" r="6" fill="${dotColor}" stroke="white" stroke-width="2.5">
-      <title>${escHtml(tooltipText)}: ${r.porcentaje.toFixed(1)}%</title>
+    const escapedText = escHtml(tooltipText).replace(/'/g, "\\'");
+    return `<circle cx="${x}" cy="${y}" r="8" fill="${dotColor}" stroke="white" stroke-width="2.5" 
+      class="progreso-dot"
+      onmouseover="showTooltip(event, '${escapedText}: ${r.porcentaje.toFixed(1)}%')" 
+      onmouseout="hideTooltip()"
+      ontouchstart="showTooltip(event, '${escapedText}: ${r.porcentaje.toFixed(1)}%')"
+      style="cursor: pointer; pointer-events: all; -webkit-tap-highlight-color: transparent;">
     </circle>`;
   }).join('');
 

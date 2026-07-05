@@ -1311,3 +1311,7 @@ body.dashboard-mode {
   .score-ring-wrap { width: 76px; height: 76px; }
   .score-ring-svg  { width: 76px; height: 76px; }
 }
+
+/* Custom Tooltip */
+.custom-tooltip { position: fixed; background: rgba(0, 0, 0, 0.85); color: #fff; padding: 6px 12px; border-radius: 6px; font-size: 13px; font-weight: 500; pointer-events: none; opacity: 0; transition: opacity 0.2s ease; z-index: 9999; transform: translate(-50%, -120%); white-space: nowrap; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+.custom-tooltip.visible { opacity: 1; }
