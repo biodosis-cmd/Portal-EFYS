@@ -641,13 +641,6 @@ function buildLineChart(registros, tendencia) {
     </circle>`;
   }).join('');
 
-  // Labels eje X
-  const labelsX = registros.map((r, i) => {
-    const x = xOf(i).toFixed(1);
-    const label = r.nombre_eval.length > 12 ? r.nombre_eval.substring(0, 12) + '…' : r.nombre_eval;
-    return `<text x="${x}" y="${(H - 6).toFixed(1)}" text-anchor="middle" font-size="10" fill="#a0aec0" font-family="Outfit, sans-serif">${escHtml(label)}</text>`;
-  }).join('');
-
   // Lines de guía Y
   const yGuides = [25, 50, 75, 100].filter(v => v >= minP && v <= maxP).map(v => {
     const y = yOf(v).toFixed(1);
@@ -668,7 +661,6 @@ function buildLineChart(registros, tendencia) {
       <path d="${areaPath}" fill="url(#areaGrad${tendencia})"/>
       <path d="${linePath}" fill="none" stroke="${lineColor}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
       ${dots}
-      ${labelsX}
     </svg>`;
 }
 
