@@ -370,10 +370,36 @@ function renderEvaluaciones(evaluaciones) {
     return;
   }
 
-  evaluaciones.forEach((ev, i) => {
-    const card = buildEvalCard(ev, i);
-    evalsContainer.appendChild(card);
-  });
+  const s1Evals = evaluaciones.filter(ev => ev.semestre === 1);
+  const s2Evals = evaluaciones.filter(ev => ev.semestre === 2);
+
+  let animDelay = 0;
+
+  if (s1Evals.length > 0) {
+    const s1Title = document.createElement('h3');
+    s1Title.className = 'semester-title';
+    s1Title.textContent = 'Primer Semestre';
+    evalsContainer.appendChild(s1Title);
+
+    s1Evals.forEach((ev) => {
+      const card = buildEvalCard(ev, animDelay++);
+      evalsContainer.appendChild(card);
+    });
+  }
+
+  if (s2Evals.length > 0) {
+    const s2Title = document.createElement('h3');
+    s2Title.className = 'semester-title';
+    s2Title.textContent = 'Segundo Semestre';
+    // Agregar un poco de margen top si ya hubo S1
+    if (s1Evals.length > 0) s2Title.style.marginTop = '2rem';
+    evalsContainer.appendChild(s2Title);
+
+    s2Evals.forEach((ev) => {
+      const card = buildEvalCard(ev, animDelay++);
+      evalsContainer.appendChild(card);
+    });
+  }
 
   // Animar score rings después de que el DOM esté listo
   requestAnimationFrame(() => {
@@ -620,10 +646,11 @@ function buildProgresoCard(oa, index) {
   const chips = oa.registros.map(r => {
     const pct = r.porcentaje;
     const color = pct >= 75 ? '#00b894' : pct >= 50 ? '#fdcb6e' : '#fc5c65';
+    const semBadge = r.semestre ? `<span class="record-sem-badge">S${r.semestre}</span>` : '';
     return `
       <div class="progreso-record-chip">
         <span class="record-pct" style="color:${color}">${pct.toFixed(0)}%</span>
-        <span class="record-eval-name">${escHtml(r.nombre_eval)}</span>
+        <span class="record-eval-name">${escHtml(r.nombre_eval)} ${semBadge}</span>
         <span class="record-fecha">${formatFechaCorta(r.fecha)}</span>
       </div>`;
   }).join('');
