@@ -1432,3 +1432,219 @@ body.dashboard-mode {
   border: 1px solid var(--border-color);
 }
 
+/* =========================================================
+   MIS NOTAS — Vista consolidada por semestre
+   ========================================================= */
+.notas-semester-block {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  border: 1.5px solid var(--border);
+  overflow: hidden;
+  animation: fadeUp .4s ease both;
+}
+
+.notas-semester-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 22px;
+  border-bottom: 1.5px solid var(--border);
+  background: linear-gradient(135deg, #fafbff, #f0f4f8);
+}
+
+.notas-semester-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-dark);
+}
+
+.notas-sem-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, var(--teal), var(--sky));
+  color: white;
+  font-size: 12px;
+  font-weight: 800;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.notas-semester-avg {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.notas-avg-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-soft);
+}
+
+.notas-avg-value {
+  font-size: 28px;
+  font-weight: 900;
+  line-height: 1;
+  font-family: 'Outfit', sans-serif;
+}
+
+.notas-table-wrap {
+  overflow-x: auto;
+}
+
+.notas-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.notas-th {
+  text-align: left;
+  padding: 10px 22px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-soft);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.notas-th-fecha { text-align: center; }
+.notas-th-unidad { text-align: left; }
+.notas-th-nota { text-align: right; padding-right: 24px; }
+
+.notas-row {
+  transition: background var(--tr);
+}
+
+.notas-row:hover {
+  background: #f8fafc;
+}
+
+.notas-row:not(:last-child) td {
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.notas-td-name {
+  padding: 14px 22px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.notas-ev-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+.notas-directa-badge {
+  font-size: 12px;
+  opacity: 0.6;
+}
+
+.notas-td-fecha {
+  padding: 14px 16px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-mid);
+  white-space: nowrap;
+}
+
+.notas-td-unidad {
+  padding: 14px 16px;
+  font-size: 13px;
+  color: var(--text-soft);
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.notas-td-nota {
+  padding: 14px 24px 14px 16px;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.notas-nota-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+.notas-nota-value {
+  font-size: 18px;
+  font-weight: 800;
+  font-family: 'Outfit', sans-serif;
+  vertical-align: middle;
+}
+
+/* Promedio Anual */
+.notas-anual-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(135deg, #1a202c, #2d3748);
+  border-radius: var(--radius-lg);
+  padding: 20px 24px;
+  animation: fadeUp .4s ease both;
+}
+
+.notas-anual-label {
+  font-size: 15px;
+  font-weight: 700;
+  color: rgba(255,255,255,.85);
+  letter-spacing: 0.3px;
+}
+
+.notas-anual-value {
+  font-size: 32px;
+  font-weight: 900;
+  font-family: 'Outfit', sans-serif;
+  line-height: 1;
+}
+
+/* Responsive — Mis Notas */
+@media (max-width: 640px) {
+  .notas-semester-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 14px 16px;
+  }
+
+  .notas-semester-avg {
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .notas-avg-value {
+    font-size: 22px;
+  }
+
+  .notas-th { padding: 8px 14px; font-size: 10px; }
+  .notas-td-name { padding: 10px 14px; }
+  .notas-td-fecha { padding: 10px 12px; }
+  .notas-td-unidad { display: none; }
+  .notas-td-nota { padding: 10px 16px 10px 12px; }
+
+  .notas-th-unidad { display: none; }
+
+  .notas-anual-card { padding: 16px 18px; }
+  .notas-anual-value { font-size: 26px; }
+}

@@ -161,6 +161,17 @@
           <span class="tab-icon" aria-hidden="true">📈</span>
           <span class="tab-label">Mi Progreso</span>
         </button>
+        <button
+          class="tab-btn"
+          id="tab-btn-notas"
+          data-tab="notas"
+          role="tab"
+          aria-selected="false"
+          aria-controls="panel-notas"
+        >
+          <span class="tab-icon" aria-hidden="true">📋</span>
+          <span class="tab-label">Mis Notas</span>
+        </button>
       </nav>
 
       <!-- Tab 1: Evaluaciones -->
@@ -181,6 +192,16 @@
         aria-labelledby="tab-btn-progreso"
       >
         <div id="progreso-container" class="cards-grid"></div>
+      </section>
+
+      <!-- Tab 3: Mis Notas -->
+      <section
+        id="panel-notas"
+        class="tab-panel hidden"
+        role="tabpanel"
+        aria-labelledby="tab-btn-notas"
+      >
+        <div id="notas-container" class="cards-grid"></div>
       </section>
 
     </div><!-- /dash-content -->

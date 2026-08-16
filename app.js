@@ -31,6 +31,7 @@ const btnRetry       = document.getElementById('btn-retry');
 const dashContent    = document.getElementById('dash-content');
 const evalsContainer = document.getElementById('evals-container');
 const progresoContainer = document.getElementById('progreso-container');
+const notasContainer    = document.getElementById('notas-container');
 
 // Tab buttons y panels
 const tabBtns   = document.querySelectorAll('.tab-btn');
@@ -326,6 +327,7 @@ async function loadDashboardData(idAlumno) {
 function renderFullDashboard(data) {
   renderEvaluaciones(data.evaluaciones || []);
   renderProgreso(data.progreso || [], data.evaluaciones || []);
+  renderNotas(data.evaluaciones || []);
   showContentState();
   setActiveTab(activeTab); // restaurar tab activo
 }
@@ -740,6 +742,106 @@ function buildLineChart(registros, tendencia) {
       <path d="${linePath}" fill="none" stroke="${lineColor}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
       ${dots}
     </svg>`;
+}
+
+// ─────────────────────────────────────────────
+// RENDER — MIS NOTAS (Vista consolidada)
+// ─────────────────────────────────────────────
+function renderNotas(evaluaciones) {
+  notasContainer.innerHTML = '';
+
+  if (!evaluaciones.length) {
+    notasContainer.innerHTML = '<p style="text-align:center;color:var(--text-soft);padding:2rem;">Aún no hay evaluaciones registradas.</p>';
+    return;
+  }
+
+  const s1 = evaluaciones.filter(e => e.semestre === 1);
+  const s2 = evaluaciones.filter(e => e.semestre === 2);
+
+  function calcPromedio(evals) {
+    const conNota = evals.filter(e => e.nota !== null && e.nota !== undefined);
+    if (conNota.length === 0) return null;
+    const sum = conNota.reduce((acc, e) => acc + e.nota, 0);
+    return Math.round((sum / conNota.length) * 10) / 10;
+  }
+
+  function buildSemesterBlock(evals, titulo, semNum) {
+    if (evals.length === 0) return '';
+
+    const promedio = calcPromedio(evals);
+    const promedioColor = promedio !== null ? getNotaColor(promedio) : '#a0aec0';
+
+    let rowsHTML = '';
+    evals.forEach(ev => {
+      const nota = ev.nota;
+      const color = getNotaColor(nota);
+      const fechaFmt = formatFecha(ev.fecha);
+      const isDirecta = ev.total_max === -1;
+
+      rowsHTML += `
+        <tr class="notas-row">
+          <td class="notas-td-name">
+            <span class="notas-ev-name">${ev.nombre}</span>
+            ${isDirecta ? '<span class="notas-directa-badge" title="Nota ingresada directamente">✍️</span>' : ''}
+          </td>
+          <td class="notas-td-fecha">${fechaFmt}</td>
+          <td class="notas-td-unidad">${ev.descripcion || '—'}</td>
+          <td class="notas-td-nota">
+            <span class="notas-nota-dot" style="background:${color}"></span>
+            <span class="notas-nota-value" style="color:${color}">${nota !== null ? nota.toFixed(1) : '—'}</span>
+          </td>
+        </tr>
+      `;
+    });
+
+    return `
+      <div class="notas-semester-block">
+        <div class="notas-semester-header">
+          <div class="notas-semester-title">
+            <span class="notas-sem-badge">S${semNum}</span>
+            ${titulo}
+          </div>
+          <div class="notas-semester-avg">
+            <span class="notas-avg-label">Promedio</span>
+            <span class="notas-avg-value" style="color:${promedioColor}">${promedio !== null ? promedio.toFixed(1) : '—'}</span>
+          </div>
+        </div>
+        <div class="notas-table-wrap">
+          <table class="notas-table">
+            <thead>
+              <tr>
+                <th class="notas-th">Evaluación</th>
+                <th class="notas-th notas-th-fecha">Fecha</th>
+                <th class="notas-th notas-th-unidad">Unidad</th>
+                <th class="notas-th notas-th-nota">Nota</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rowsHTML}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+  }
+
+  let html = '';
+  html += buildSemesterBlock(s1, 'Primer Semestre', 1);
+  html += buildSemesterBlock(s2, 'Segundo Semestre', 2);
+
+  // Promedio anual
+  const promedioAnual = calcPromedio(evaluaciones);
+  if (promedioAnual !== null) {
+    const anualColor = getNotaColor(promedioAnual);
+    html += `
+      <div class="notas-anual-card">
+        <span class="notas-anual-label">Promedio Anual</span>
+        <span class="notas-anual-value" style="color:${anualColor}">${promedioAnual.toFixed(1)}</span>
+      </div>
+    `;
+  }
+
+  notasContainer.innerHTML = html;
 }
 
 // ─────────────────────────────────────────────
