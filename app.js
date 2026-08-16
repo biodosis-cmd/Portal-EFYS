@@ -688,27 +688,7 @@ function renderNotas(evaluaciones) {
         <tr class="notas-row-detail">
           <td colspan="4" class="notas-detail-td">
             <div class="notas-detail-content">
-              ${isDirecta ? '' : `
-              <div class="eval-score-section" style="display:flex; gap:16px; align-items:center; padding-bottom:20px; margin-bottom:20px; border-bottom:1px dashed var(--border);">
-                <div class="score-ring-wrap" title="Nota: ${nota !== null ? nota : '—'} / 7.0">
-                  ${ringData.svg}
-                  <div class="score-ring-text">
-                    <span class="score-nota-num" style="color:${color}">${nota !== null ? nota.toFixed(1) : '—'}</span>
-                    <span class="score-nota-max">/ 7.0</span>
-                  </div>
-                </div>
-                <div class="eval-score-badges">
-                  <span class="nivel-badge ${nivel.cls}">
-                    ${nivel.emoji} ${nivel.texto}
-                  </span>
-                  ${ev.total_max > 0 ? `
-                  <div class="puntaje-total">
-                    <strong>${ev.total_puntaje}</strong> / ${ev.total_max} pts
-                    ${ev.porcentaje !== null ? `· ${ev.porcentaje.toFixed(1)}%` : ''}
-                  </div>` : ''}
-                </div>
-              </div>
-              `}
+              ${isDirecta ? '' : ''}
               
               <div class="rubrica-section" style="${isDirecta ? 'padding-top:0;' : ''}">
                 ${isDirecta ? '<p style="color:var(--text-soft); font-size:14px; text-align:center; padding:10px 0;">Esta nota fue ingresada directamente sin una rúbrica asociada.</p>' : indicHTML}
