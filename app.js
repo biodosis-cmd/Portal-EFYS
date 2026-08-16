@@ -29,7 +29,6 @@ const dashError      = document.getElementById('dash-error');
 const dashErrorMsg   = document.getElementById('dash-error-msg');
 const btnRetry       = document.getElementById('btn-retry');
 const dashContent    = document.getElementById('dash-content');
-const evalsContainer = document.getElementById('evals-container');
 const progresoContainer = document.getElementById('progreso-container');
 const notasContainer    = document.getElementById('notas-container');
 
@@ -42,7 +41,7 @@ const tabPanels = document.querySelectorAll('.tab-panel');
 // ─────────────────────────────────────────────
 let currentSession   = null;
 let currentDashboard = null;
-let activeTab        = 'evaluaciones';
+let activeTab        = 'notas';
 let retryIdAlumno    = null;
 
 // ─────────────────────────────────────────────
@@ -325,9 +324,8 @@ async function loadDashboardData(idAlumno) {
 // RENDER PRINCIPAL
 // ─────────────────────────────────────────────
 function renderFullDashboard(data) {
-  renderEvaluaciones(data.evaluaciones || []);
-  renderProgreso(data.progreso || [], data.evaluaciones || []);
   renderNotas(data.evaluaciones || []);
+  renderProgreso(data.progreso || [], data.evaluaciones || []);
   showContentState();
   setActiveTab(activeTab); // restaurar tab activo
 }
