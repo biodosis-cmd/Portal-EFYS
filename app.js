@@ -29,7 +29,6 @@ const dashError      = document.getElementById('dash-error');
 const dashErrorMsg   = document.getElementById('dash-error-msg');
 const btnRetry       = document.getElementById('btn-retry');
 const dashContent    = document.getElementById('dash-content');
-const progresoContainer = document.getElementById('progreso-container');
 const notasContainer    = document.getElementById('notas-container');
 
 // Tab buttons y panels
@@ -41,7 +40,6 @@ const tabPanels = document.querySelectorAll('.tab-panel');
 // ─────────────────────────────────────────────
 let currentSession   = null;
 let currentDashboard = null;
-let activeTab        = 'notas';
 let currentEvaluaciones = [];
 let retryIdAlumno    = null;
 
@@ -326,34 +324,13 @@ async function loadDashboardData(idAlumno) {
 // ─────────────────────────────────────────────
 function renderFullDashboard(data) {
   renderNotas(data.evaluaciones || []);
-  renderProgreso(data.progreso || [], data.evaluaciones || []);
-  showContentState();
-  setActiveTab(activeTab); // restaurar tab activo
-}
+    showContentState();
+  }
 
 // ─────────────────────────────────────────────
 // TABS
 // ─────────────────────────────────────────────
-function setActiveTab(tabId) {
-  activeTab = tabId;
 
-  tabBtns.forEach(btn => {
-    const isActive = btn.dataset.tab === tabId;
-    btn.classList.toggle('active', isActive);
-    btn.setAttribute('aria-selected', isActive);
-  });
-
-  tabPanels.forEach(panel => {
-    const panelTab = panel.id.replace('panel-', '');
-    if (panelTab === tabId) {
-      panel.classList.add('active');
-      panel.classList.remove('hidden');
-    } else {
-      panel.classList.remove('active');
-      panel.classList.add('hidden');
-    }
-  });
-}
 
 // ─────────────────────────────────────────────
 // RENDER — EVALUACIONES
@@ -437,263 +414,6 @@ function buildRubricaTable(indicadores) {
       ${cards}
     </div>
   `;
-}
-
-// ─────────────────────────────────────────────
-// RENDER — PROGRESO
-// ─────────────────────────────────────────────
-function renderProgreso(progreso, evaluaciones) {
-  progresoContainer.innerHTML = '';
-
-  // Header informativo
-  const headerCard = document.createElement('div');
-  headerCard.className = 'progreso-header';
-  headerCard.innerHTML = `
-    <div class="progreso-header-icon">📈</div>
-    <div class="progreso-header-text">
-      <h3>Evolución por Objetivo de Aprendizaje</h3>
-      <p>Se comparan los OA que aparecen en 2 o más evaluaciones.</p>
-    </div>`;
-  progresoContainer.appendChild(headerCard);
-
-  if (!progreso.length) {
-    const empty = document.createElement('div');
-    empty.className = 'progreso-empty';
-    empty.innerHTML = `
-      <div class="progreso-empty-icon">🌱</div>
-      <h3>¡Sigue adelante!</h3>
-      <p>El progreso por OA aparecerá cuando tengas evaluaciones con objetivos de aprendizaje en común. ¡Cada evaluación suma!</p>`;
-    progresoContainer.appendChild(empty);
-    return;
-  }
-
-  progreso.forEach((oa, i) => {
-    const card = buildProgresoCard(oa, i);
-    progresoContainer.appendChild(card);
-  });
-}
-
-function buildProgresoCard(oa, index) {
-  const card = document.createElement('div');
-  card.className = 'progreso-card';
-  card.style.animationDelay = (index * 0.08) + 's';
-
-  const tendencia = oa.tendencia || 'estable';
-  const tendTexto = tendencia === 'subio'  ? '↑ Mejoró'
-                  : tendencia === 'bajo'   ? '↓ Bajó'
-                  : '→ Estable';
-
-  const mejora = oa.mejora_puntos;
-  const mejoraStr = mejora > 0  ? `+${mejora.toFixed(1)}%`
-                  : mejora < 0  ? `${mejora.toFixed(1)}%`
-                  : '=';
-
-  // Chips de registros
-  const chips = oa.registros.map(r => {
-    const pct = r.porcentaje;
-    const color = pct >= 75 ? '#00b894' : pct >= 50 ? '#fdcb6e' : '#fc5c65';
-    const semBadge = r.semestre ? `<span class="record-sem-badge">S${r.semestre}</span>` : '';
-    return `
-      <div class="progreso-record-chip">
-        <span class="record-pct" style="color:${color}">${pct.toFixed(0)}%</span>
-        <span class="record-eval-name">${escHtml(r.nombre_eval)} ${semBadge}</span>
-        <span class="record-fecha">${formatFechaCorta(r.fecha)}</span>
-      </div>`;
-  }).join('');
-
-  // SVG chart
-  const svgChart = buildLineChart(oa.registros, tendencia);
-
-  card.innerHTML = `
-    <div class="progreso-card-header">
-      <div class="progreso-oa">
-        <span class="progreso-oa-num">${escHtml(oa.oa_numero)}</span>
-      </div>
-      <span class="tendencia-badge ${tendencia}">
-        ${tendTexto} (${mejoraStr})
-      </span>
-    </div>
-    <div class="progreso-chart-area">
-      <div class="chart-svg-wrap">${svgChart}</div>
-      <div class="progreso-records">${chips}</div>
-    </div>`;
-
-  return card;
-}
-
-function buildLineChart(registros, tendencia) {
-  if (registros.length < 2) return '';
-
-  const W = 560, H = 120;
-  const pad = { t: 16, r: 20, b: 32, l: 44 };
-  const cW = W - pad.l - pad.r;
-  const cH = H - pad.t - pad.b;
-
-  const pcts = registros.map(r => r.porcentaje);
-  const minP = Math.max(0,  Math.min(...pcts) - 15);
-  const maxP = Math.min(100, Math.max(...pcts) + 15);
-  const range = maxP - minP || 10;
-
-  const xOf = (i) => pad.l + (i / (registros.length - 1)) * cW;
-  const yOf = (p) => pad.t + cH - ((p - minP) / range) * cH;
-
-  const lineColor = tendencia === 'subio'  ? '#00b894'
-                  : tendencia === 'bajo'   ? '#fc5c65'
-                  : '#fdcb6e';
-
-  // Path de línea
-  const linePath = registros.map((r, i) => `${i === 0 ? 'M' : 'L'} ${xOf(i).toFixed(1)},${yOf(r.porcentaje).toFixed(1)}`).join(' ');
-
-  // Área rellena
-  const areaPath = linePath
-    + ` L${xOf(registros.length - 1).toFixed(1)},${(pad.t + cH).toFixed(1)}`
-    + ` L${pad.l.toFixed(1)},${(pad.t + cH).toFixed(1)} Z`;
-
-  // Puntos con Bottom Sheet
-  const dots = registros.map((r, i) => {
-    const x = xOf(i).toFixed(1);
-    const y = yOf(r.porcentaje).toFixed(1);
-    const dotColor = r.porcentaje >= 75 ? '#00b894' : r.porcentaje >= 50 ? '#fdcb6e' : '#fc5c65';
-    const criterioText = (r.criterio || r.nombre_eval).replace(/'/g, "\\'");
-    const evalText = (r.nombre_eval || '').replace(/'/g, "\\'");
-    const pctText = r.porcentaje.toFixed(1) + '%';
-    return `<circle cx="${x}" cy="${y}" r="8" fill="${dotColor}" stroke="white" stroke-width="2.5" 
-      class="progreso-dot"
-      onclick="showDotInfo('${criterioText}', '${pctText}', '${evalText}')"
-      ontouchstart="showDotInfo('${criterioText}', '${pctText}', '${evalText}')"
-      style="cursor: pointer; pointer-events: all; -webkit-tap-highlight-color: transparent;">
-    </circle>`;
-  }).join('');
-
-  // Lines de guía Y
-  const yGuides = [25, 50, 75, 100].filter(v => v >= minP && v <= maxP).map(v => {
-    const y = yOf(v).toFixed(1);
-    return `
-      <line x1="${pad.l}" y1="${y}" x2="${W - pad.r}" y2="${y}" stroke="#f0f4f8" stroke-width="1" stroke-dasharray="4,3"/>
-      <text x="${(pad.l - 6).toFixed(1)}" y="${(parseFloat(y) + 4).toFixed(1)}" text-anchor="end" font-size="9" fill="#cbd5e0" font-family="Outfit, sans-serif">${v}%</text>`;
-  }).join('');
-
-  return `
-    <svg width="100%" viewBox="0 0 ${W} ${H}" style="overflow:visible;" role="img" aria-label="Gráfico de progreso">
-      <defs>
-        <linearGradient id="areaGrad${tendencia}" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="${lineColor}" stop-opacity="0.25"/>
-          <stop offset="100%" stop-color="${lineColor}" stop-opacity="0.02"/>
-        </linearGradient>
-      </defs>
-      ${yGuides}
-      <path d="${areaPath}" fill="url(#areaGrad${tendencia})"/>
-      <path d="${linePath}" fill="none" stroke="${lineColor}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-      ${dots}
-    </svg>`;
-}
-
-// ─────────────────────────────────────────────
-// RENDER — MIS NOTAS (Vista consolidada con detalle)
-// ─────────────────────────────────────────────
-function renderNotas(evaluaciones) {
-  notasContainer.innerHTML = '';
-  currentEvaluaciones = evaluaciones;
-
-  if (!evaluaciones.length) {
-    notasContainer.innerHTML = '<p style="text-align:center;color:var(--text-soft);padding:2rem;">Aún no hay evaluaciones registradas.</p>';
-    return;
-  }
-
-  const s1 = evaluaciones.filter(e => e.semestre === 1);
-  const s2 = evaluaciones.filter(e => e.semestre === 2);
-
-  function calcPromedio(evals) {
-    const conNota = evals.filter(e => e.nota !== null && e.nota !== undefined);
-    if (conNota.length === 0) return null;
-    const sum = conNota.reduce((acc, e) => acc + e.nota, 0);
-    return Math.round((sum / conNota.length) * 10) / 10;
-  }
-
-  function buildSemesterBlock(evals, titulo, semNum) {
-    if (evals.length === 0) return '';
-
-    const promedio = calcPromedio(evals);
-    const promedioColor = promedio !== null ? getNotaColor(promedio) : '#a0aec0';
-
-    let rowsHTML = '';
-    evals.forEach(ev => {
-      // Find global index
-      const globalIdx = currentEvaluaciones.findIndex(e => e.id === ev.id);
-      const nota = ev.nota;
-      const color = getNotaColor(nota);
-      const fechaFmt = formatFecha(ev.fecha);
-      const isDirecta = ev.total_max === -1;
-
-      rowsHTML += `
-        <tr class="notas-row" onclick="openRubricModal(${globalIdx})" tabindex="0" role="button">
-          <td class="notas-td-name">
-            <div style="display:flex; align-items:center; gap:6px;">
-              <span class="notas-ev-name">${escHtml(ev.nombre)}</span>
-              ${isDirecta ? '<span class="notas-directa-badge" title="Nota ingresada directamente">✍️</span>' : ''}
-            </div>
-          </td>
-          <td class="notas-td-fecha">${fechaFmt}</td>
-          <td class="notas-td-unidad">${escHtml(ev.descripcion || '—')}</td>
-          <td class="notas-td-nota">
-            <div class="notas-td-nota-inner">
-              <span class="notas-nota-dot" style="background:${color}"></span>
-              <span class="notas-nota-value" style="color:${color}">${nota !== null ? nota.toFixed(1) : '—'}</span>
-              <svg class="row-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
-            </div>
-          </td>
-        </tr>
-      `;
-    });
-
-    return `
-      <div class="notas-semester-block">
-        <div class="notas-semester-header">
-          <div class="notas-semester-title">
-            <span class="notas-sem-badge">S${semNum}</span>
-            ${titulo}
-          </div>
-          <div class="notas-semester-avg">
-            <span class="notas-avg-label">Promedio</span>
-            <span class="notas-avg-value" style="color:${promedioColor}">${promedio !== null ? promedio.toFixed(1) : '—'}</span>
-          </div>
-        </div>
-        <div class="notas-table-wrap">
-          <table class="notas-table">
-            <thead>
-              <tr>
-                <th class="notas-th">Evaluación</th>
-                <th class="notas-th notas-th-fecha">Fecha</th>
-                <th class="notas-th notas-th-unidad">Unidad</th>
-                <th class="notas-th notas-th-nota">Nota</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${rowsHTML}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    `;
-  }
-
-  let html = '';
-  html += buildSemesterBlock(s1, 'Primer Semestre', 1);
-  html += buildSemesterBlock(s2, 'Segundo Semestre', 2);
-
-  // Promedio anual
-  const promedioAnual = calcPromedio(evaluaciones);
-  if (promedioAnual !== null) {
-    const anualColor = getNotaColor(promedioAnual);
-    html += `
-      <div class="notas-anual-card">
-        <span class="notas-anual-label">Promedio Anual</span>
-        <span class="notas-anual-value" style="color:${anualColor}">${promedioAnual.toFixed(1)}</span>
-      </div>
-    `;
-  }
-
-  notasContainer.innerHTML = html;
 }
 
 // ─────────────────────────────────────────────

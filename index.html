@@ -138,50 +138,14 @@
     <div id="dash-content" class="dash-content hidden">
 
       <!-- Navegación por tabs -->
-      <nav class="tab-nav" role="tablist" aria-label="Secciones del informe">
-        <button
-          class="tab-btn active"
-          id="tab-btn-notas"
-          data-tab="notas"
-          role="tab"
-          aria-selected="true"
-          aria-controls="panel-notas"
-        >
-          <span class="tab-icon" aria-hidden="true">📋</span>
-          <span class="tab-label">Mis Notas</span>
-        </button>
-        <button
-          class="tab-btn"
-          id="tab-btn-progreso"
-          data-tab="progreso"
-          role="tab"
-          aria-selected="false"
-          aria-controls="panel-progreso"
-        >
-          <span class="tab-icon" aria-hidden="true">📈</span>
-          <span class="tab-label">Mi Progreso</span>
-        </button>
-      </nav>
+      
 
       <!-- Tab 1: Mis Notas -->
-      <section
-        id="panel-notas"
-        class="tab-panel active"
-        role="tabpanel"
-        aria-labelledby="tab-btn-notas"
-      >
+      <section id="panel-notas">
         <div id="notas-container" class="cards-grid"></div>
       </section>
 
-      <!-- Tab 2: Progreso -->
-      <section
-        id="panel-progreso"
-        class="tab-panel hidden"
-        role="tabpanel"
-        aria-labelledby="tab-btn-progreso"
-      >
-        <div id="progreso-container" class="cards-grid"></div>
-      </section>
+      
 
     </div><!-- /dash-content -->
 
