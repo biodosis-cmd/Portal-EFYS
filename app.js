@@ -417,6 +417,114 @@ function buildRubricaTable(indicadores) {
 }
 
 // ─────────────────────────────────────────────
+// RENDER — MIS NOTAS (Vista consolidada con detalle)
+// ─────────────────────────────────────────────
+function renderNotas(evaluaciones) {
+  notasContainer.innerHTML = '';
+  currentEvaluaciones = evaluaciones;
+
+  if (!evaluaciones.length) {
+    notasContainer.innerHTML = '<p style="text-align:center;color:var(--text-soft);padding:2rem;">Aún no hay evaluaciones registradas.</p>';
+    return;
+  }
+
+  const s1 = evaluaciones.filter(e => e.semestre === 1);
+  const s2 = evaluaciones.filter(e => e.semestre === 2);
+
+  function calcPromedio(evals) {
+    const conNota = evals.filter(e => e.nota !== null && e.nota !== undefined);
+    if (conNota.length === 0) return null;
+    const sum = conNota.reduce((acc, e) => acc + e.nota, 0);
+    return Math.round((sum / conNota.length) * 10) / 10;
+  }
+
+  function buildSemesterBlock(evals, titulo, semNum) {
+    if (evals.length === 0) return '';
+
+    const promedio = calcPromedio(evals);
+    const promedioColor = promedio !== null ? getNotaColor(promedio) : '#a0aec0';
+
+    let rowsHTML = '';
+    evals.forEach(ev => {
+      // Find global index
+      const globalIdx = currentEvaluaciones.indexOf(ev);
+      const nota = ev.nota;
+      const color = getNotaColor(nota);
+      const fechaFmt = formatFecha(ev.fecha);
+      const isDirecta = ev.total_max === -1;
+
+      rowsHTML += `
+        <tr class="notas-row" onclick="openRubricModal(${globalIdx})" tabindex="0" role="button">
+          <td class="notas-td-name">
+            <div style="display:flex; align-items:center; gap:6px;">
+              <span class="notas-ev-name">${escHtml(ev.nombre)}</span>
+              ${isDirecta ? '<span class="notas-directa-badge" title="Nota ingresada directamente">✍️</span>' : ''}
+            </div>
+          </td>
+          <td class="notas-td-fecha">${fechaFmt}</td>
+          <td class="notas-td-unidad">${escHtml(ev.descripcion || '—')}</td>
+          <td class="notas-td-nota">
+            <div class="notas-td-nota-inner">
+              <span class="notas-nota-dot" style="background:${color}"></span>
+              <span class="notas-nota-value" style="color:${color}">${nota !== null ? nota.toFixed(1) : '—'}</span>
+              <svg class="row-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+            </div>
+          </td>
+        </tr>
+      `;
+    });
+
+    return `
+      <div class="notas-semester-block">
+        <div class="notas-semester-header">
+          <div class="notas-semester-title">
+            <span class="notas-sem-badge">S${semNum}</span>
+            ${titulo}
+          </div>
+          <div class="notas-semester-avg">
+            <span class="notas-avg-label">Promedio</span>
+            <span class="notas-avg-value" style="color:${promedioColor}">${promedio !== null ? promedio.toFixed(1) : '—'}</span>
+          </div>
+        </div>
+        <div class="notas-table-wrap">
+          <table class="notas-table">
+            <thead>
+              <tr>
+                <th class="notas-th">Evaluación</th>
+                <th class="notas-th notas-th-fecha">Fecha</th>
+                <th class="notas-th notas-th-unidad">Unidad</th>
+                <th class="notas-th notas-th-nota">Nota</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rowsHTML}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+  }
+
+  let html = '';
+  html += buildSemesterBlock(s1, 'Primer Semestre', 1);
+  html += buildSemesterBlock(s2, 'Segundo Semestre', 2);
+
+  // Promedio anual
+  const promedioAnual = calcPromedio(evaluaciones);
+  if (promedioAnual !== null) {
+    const anualColor = getNotaColor(promedioAnual);
+    html += `
+      <div class="notas-anual-card">
+        <span class="notas-anual-label">Promedio Anual</span>
+        <span class="notas-anual-value" style="color:${anualColor}">${promedioAnual.toFixed(1)}</span>
+      </div>
+    `;
+  }
+
+  notasContainer.innerHTML = html;
+}
+
+// ─────────────────────────────────────────────
 // MODAL DE RÚBRICA
 // ─────────────────────────────────────────────
 function openRubricModal(globalIdx) {
