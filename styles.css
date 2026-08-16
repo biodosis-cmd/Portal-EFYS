@@ -1648,3 +1648,50 @@ body.dashboard-mode {
   .notas-anual-card { padding: 16px 18px; }
   .notas-anual-value { font-size: 26px; }
 }
+
+/* Estilos para el detalle expandible de notas */
+.notas-row {
+  cursor: pointer;
+  user-select: none;
+}
+.notas-row:hover {
+  background: #f8fafc;
+}
+.notas-row.expanded {
+  background: #f8fafc;
+}
+.notas-td-nota-inner {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+.row-chevron {
+  margin-left: 12px;
+  color: var(--text-soft);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.notas-row.expanded .row-chevron {
+  transform: rotate(180deg);
+}
+
+.notas-row-detail {
+  display: none;
+  background: #f8fafc;
+}
+.notas-row-detail.expanded {
+  display: table-row;
+}
+.notas-detail-td {
+  padding: 0;
+  border-bottom: 1px solid var(--border);
+}
+.notas-detail-content {
+  padding: 24px;
+  border-top: 1px dashed var(--border);
+  animation: fadeUp 0.3s ease both;
+}
+@media (max-width: 640px) {
+  .notas-detail-content {
+    padding: 16px 14px;
+  }
+}

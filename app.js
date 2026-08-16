@@ -588,7 +588,7 @@ function buildLineChart(registros, tendencia) {
 }
 
 // ─────────────────────────────────────────────
-// RENDER — MIS NOTAS (Vista consolidada)
+// RENDER — MIS NOTAS (Vista consolidada con detalle)
 // ─────────────────────────────────────────────
 function renderNotas(evaluaciones) {
   notasContainer.innerHTML = '';
@@ -615,29 +615,112 @@ function renderNotas(evaluaciones) {
     const promedioColor = promedio !== null ? getNotaColor(promedio) : '#a0aec0';
 
     let rowsHTML = '';
-    evals.forEach(ev => {
+    evals.forEach((ev, index) => {
       const nota = ev.nota;
       const color = getNotaColor(nota);
       const fechaFmt = formatFecha(ev.fecha);
       const isDirecta = ev.total_max === -1;
+      
+      const nivel = getNivelLogro(nota);
+      const ringData = buildScoreRing(nota, color);
+      const indicHTML = buildRubricaTable(ev.indicadores || []);
 
-      rowsHTML += `
-        <tr class="notas-row">
+      // Feedback
+      const r = ev.retroalimentacion;
+      const tieneRetro = r && (r.punto_fuerte || r.desafio || r.sugerencia);
+      const pf = tieneRetro ? (r.punto_fuerte || '') : '';
+      const dp = tieneRetro ? (r.desafio      || '') : '';
+      const sa = tieneRetro ? (r.sugerencia   || '') : '';
+
+      const feedbackHTML = tieneRetro ? \`
+        <div class="retro-blocks" style="margin-top: 20px;">
+          ${pf ? \`
+          <div class="retro-block pf">
+            <div class="retro-block-icon-wrap">🌟</div>
+            <div>
+              <p class="retro-block-label">Punto Fuerte</p>
+              <p class="retro-block-text">${escHtml(pf)}</p>
+            </div>
+          </div>\` : ''}
+          ${dp ? \`
+          <div class="retro-block dp">
+            <div class="retro-block-icon-wrap">🔶</div>
+            <div>
+              <p class="retro-block-label">Desafío Principal</p>
+              <p class="retro-block-text">${escHtml(dp)}</p>
+            </div>
+          </div>\` : ''}
+          ${sa ? \`
+          <div class="retro-block sa">
+            <div class="retro-block-icon-wrap">💡</div>
+            <div>
+              <p class="retro-block-label">Sugerencia Accionable</p>
+              <p class="retro-block-text">${escHtml(sa)}</p>
+            </div>
+          </div>\` : ''}
+        </div>\` : \`
+        <div class="retro-pending" style="margin-top: 20px;">
+          <div class="retro-pending-icon">⏳</div>
+          <div>
+            <p class="retro-pending-title">Retroalimentación en preparación</p>
+            <p class="retro-pending-text">El profesor está elaborando la retroalimentación personalizada para esta evaluación.</p>
+          </div>
+        </div>\`;
+
+      rowsHTML += \`
+        <tr class="notas-row" onclick="this.nextElementSibling.classList.toggle('expanded'); this.classList.toggle('expanded');" tabindex="0" role="button">
           <td class="notas-td-name">
-            <span class="notas-ev-name">${ev.nombre}</span>
-            ${isDirecta ? '<span class="notas-directa-badge" title="Nota ingresada directamente">✍️</span>' : ''}
+            <div style="display:flex; align-items:center; gap:6px;">
+              <span class="notas-ev-name">${escHtml(ev.nombre)}</span>
+              ${isDirecta ? '<span class="notas-directa-badge" title="Nota ingresada directamente">✍️</span>' : ''}
+            </div>
           </td>
           <td class="notas-td-fecha">${fechaFmt}</td>
-          <td class="notas-td-unidad">${ev.descripcion || '—'}</td>
+          <td class="notas-td-unidad">${escHtml(ev.descripcion || '—')}</td>
           <td class="notas-td-nota">
-            <span class="notas-nota-dot" style="background:${color}"></span>
-            <span class="notas-nota-value" style="color:${color}">${nota !== null ? nota.toFixed(1) : '—'}</span>
+            <div class="notas-td-nota-inner">
+              <span class="notas-nota-dot" style="background:${color}"></span>
+              <span class="notas-nota-value" style="color:${color}">${nota !== null ? nota.toFixed(1) : '—'}</span>
+              <svg class="row-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </div>
           </td>
         </tr>
-      `;
+        <tr class="notas-row-detail">
+          <td colspan="4" class="notas-detail-td">
+            <div class="notas-detail-content">
+              ${isDirecta ? '' : \`
+              <div class="eval-score-section" style="display:flex; gap:16px; align-items:center; padding-bottom:20px; margin-bottom:20px; border-bottom:1px dashed var(--border);">
+                <div class="score-ring-wrap" title="Nota: ${nota !== null ? nota : '—'} / 7.0">
+                  ${ringData.svg}
+                  <div class="score-ring-text">
+                    <span class="score-nota-num" style="color:${color}">${nota !== null ? nota.toFixed(1) : '—'}</span>
+                    <span class="score-nota-max">/ 7.0</span>
+                  </div>
+                </div>
+                <div class="eval-score-badges">
+                  <span class="nivel-badge ${nivel.cls}">
+                    ${nivel.emoji} ${nivel.texto}
+                  </span>
+                  ${ev.total_max > 0 ? \`
+                  <div class="puntaje-total">
+                    <strong>${ev.total_puntaje}</strong> / ${ev.total_max} pts
+                    ${ev.porcentaje !== null ? \`· ${ev.porcentaje.toFixed(1)}%\` : ''}
+                  </div>\` : ''}
+                </div>
+              </div>
+              \`}
+              
+              <div class="rubrica-section" style="${isDirecta ? 'padding-top:0;' : ''}">
+                ${isDirecta ? '<p style="color:var(--text-soft); font-size:14px; text-align:center; padding:10px 0;">Esta nota fue ingresada directamente sin una rúbrica asociada.</p>' : indicHTML}
+                ${!isDirecta ? feedbackHTML : ''}
+              </div>
+            </div>
+          </td>
+        </tr>
+      \`;
     });
 
-    return `
+    return \`
       <div class="notas-semester-block">
         <div class="notas-semester-header">
           <div class="notas-semester-title">
@@ -665,7 +748,7 @@ function renderNotas(evaluaciones) {
           </table>
         </div>
       </div>
-    `;
+    \`;
   }
 
   let html = '';
@@ -676,17 +759,28 @@ function renderNotas(evaluaciones) {
   const promedioAnual = calcPromedio(evaluaciones);
   if (promedioAnual !== null) {
     const anualColor = getNotaColor(promedioAnual);
-    html += `
+    html += \`
       <div class="notas-anual-card">
         <span class="notas-anual-label">Promedio Anual</span>
         <span class="notas-anual-value" style="color:${anualColor}">${promedioAnual.toFixed(1)}</span>
       </div>
-    `;
+    \`;
   }
 
   notasContainer.innerHTML = html;
-}
 
+  // Animar score rings en los detalles
+  requestAnimationFrame(() => {
+    document.querySelectorAll('.score-ring-fill').forEach(ring => {
+      const targetOffset = ring.dataset.targetOffset;
+      if (targetOffset !== undefined) {
+        setTimeout(() => {
+          ring.style.strokeDashoffset = targetOffset;
+        }, 100);
+      }
+    });
+  });
+}
 // ─────────────────────────────────────────────
 // HELPERS — NIVEL DE LOGRO
 // ─────────────────────────────────────────────
