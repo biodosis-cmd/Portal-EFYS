@@ -809,13 +809,10 @@ body.dashboard-mode {
 /* Rúbrica Table */
 .rubrica-section {
   padding: 0 24px 24px;
-  display: none;
   animation: fadeDown .3s ease both;
 }
 
-.eval-card.expanded .rubrica-section {
-  display: block;
-}
+
 
 @keyframes fadeDown {
   from { opacity: 0; transform: translateY(-8px); }
