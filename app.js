@@ -632,42 +632,42 @@ function renderNotas(evaluaciones) {
       const dp = tieneRetro ? (r.desafio      || '') : '';
       const sa = tieneRetro ? (r.sugerencia   || '') : '';
 
-      const feedbackHTML = tieneRetro ? \`
+      const feedbackHTML = tieneRetro ? `
         <div class="retro-blocks" style="margin-top: 20px;">
-          ${pf ? \`
+          ${pf ? `
           <div class="retro-block pf">
             <div class="retro-block-icon-wrap">🌟</div>
             <div>
               <p class="retro-block-label">Punto Fuerte</p>
               <p class="retro-block-text">${escHtml(pf)}</p>
             </div>
-          </div>\` : ''}
-          ${dp ? \`
+          </div>` : ''}
+          ${dp ? `
           <div class="retro-block dp">
             <div class="retro-block-icon-wrap">🔶</div>
             <div>
               <p class="retro-block-label">Desafío Principal</p>
               <p class="retro-block-text">${escHtml(dp)}</p>
             </div>
-          </div>\` : ''}
-          ${sa ? \`
+          </div>` : ''}
+          ${sa ? `
           <div class="retro-block sa">
             <div class="retro-block-icon-wrap">💡</div>
             <div>
               <p class="retro-block-label">Sugerencia Accionable</p>
               <p class="retro-block-text">${escHtml(sa)}</p>
             </div>
-          </div>\` : ''}
-        </div>\` : \`
+          </div>` : ''}
+        </div>` : `
         <div class="retro-pending" style="margin-top: 20px;">
           <div class="retro-pending-icon">⏳</div>
           <div>
             <p class="retro-pending-title">Retroalimentación en preparación</p>
             <p class="retro-pending-text">El profesor está elaborando la retroalimentación personalizada para esta evaluación.</p>
           </div>
-        </div>\`;
+        </div>`;
 
-      rowsHTML += \`
+      rowsHTML += `
         <tr class="notas-row" onclick="this.nextElementSibling.classList.toggle('expanded'); this.classList.toggle('expanded');" tabindex="0" role="button">
           <td class="notas-td-name">
             <div style="display:flex; align-items:center; gap:6px;">
@@ -688,7 +688,7 @@ function renderNotas(evaluaciones) {
         <tr class="notas-row-detail">
           <td colspan="4" class="notas-detail-td">
             <div class="notas-detail-content">
-              ${isDirecta ? '' : \`
+              ${isDirecta ? '' : `
               <div class="eval-score-section" style="display:flex; gap:16px; align-items:center; padding-bottom:20px; margin-bottom:20px; border-bottom:1px dashed var(--border);">
                 <div class="score-ring-wrap" title="Nota: ${nota !== null ? nota : '—'} / 7.0">
                   ${ringData.svg}
@@ -701,14 +701,14 @@ function renderNotas(evaluaciones) {
                   <span class="nivel-badge ${nivel.cls}">
                     ${nivel.emoji} ${nivel.texto}
                   </span>
-                  ${ev.total_max > 0 ? \`
+                  ${ev.total_max > 0 ? `
                   <div class="puntaje-total">
                     <strong>${ev.total_puntaje}</strong> / ${ev.total_max} pts
-                    ${ev.porcentaje !== null ? \`· ${ev.porcentaje.toFixed(1)}%\` : ''}
-                  </div>\` : ''}
+                    ${ev.porcentaje !== null ? `· ${ev.porcentaje.toFixed(1)}%` : ''}
+                  </div>` : ''}
                 </div>
               </div>
-              \`}
+              `}
               
               <div class="rubrica-section" style="${isDirecta ? 'padding-top:0;' : ''}">
                 ${isDirecta ? '<p style="color:var(--text-soft); font-size:14px; text-align:center; padding:10px 0;">Esta nota fue ingresada directamente sin una rúbrica asociada.</p>' : indicHTML}
@@ -717,10 +717,10 @@ function renderNotas(evaluaciones) {
             </div>
           </td>
         </tr>
-      \`;
+      `;
     });
 
-    return \`
+    return `
       <div class="notas-semester-block">
         <div class="notas-semester-header">
           <div class="notas-semester-title">
@@ -748,7 +748,7 @@ function renderNotas(evaluaciones) {
           </table>
         </div>
       </div>
-    \`;
+    `;
   }
 
   let html = '';
@@ -759,12 +759,12 @@ function renderNotas(evaluaciones) {
   const promedioAnual = calcPromedio(evaluaciones);
   if (promedioAnual !== null) {
     const anualColor = getNotaColor(promedioAnual);
-    html += \`
+    html += `
       <div class="notas-anual-card">
         <span class="notas-anual-label">Promedio Anual</span>
         <span class="notas-anual-value" style="color:${anualColor}">${promedioAnual.toFixed(1)}</span>
       </div>
-    \`;
+    `;
   }
 
   notasContainer.innerHTML = html;
