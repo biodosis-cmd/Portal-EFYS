@@ -188,5 +188,22 @@
   </div><!-- /dashboard-view -->
 
   <script src="app.js"></script>
+
+  <!-- Rubric Modal -->
+  <div id="rubric-modal" class="rubric-modal-overlay">
+    <div class="rubric-modal-content">
+      <div class="rubric-modal-header">
+        <div>
+          <h2 id="rubric-modal-title">Nombre Evaluación</h2>
+          <p id="rubric-modal-date">Fecha</p>
+        </div>
+        <button class="rubric-modal-close" onclick="closeRubricModal()" aria-label="Cerrar">&times;</button>
+      </div>
+      <div id="rubric-modal-body" class="rubric-modal-body">
+        <!-- Contenido inyectado -->
+      </div>
+    </div>
+  </div>
+
 </body>
 </html>

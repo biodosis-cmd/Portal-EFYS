@@ -42,6 +42,7 @@ const tabPanels = document.querySelectorAll('.tab-panel');
 let currentSession   = null;
 let currentDashboard = null;
 let activeTab        = 'notas';
+let currentEvaluaciones = [];
 let retryIdAlumno    = null;
 
 // ─────────────────────────────────────────────
@@ -592,6 +593,7 @@ function buildLineChart(registros, tendencia) {
 // ─────────────────────────────────────────────
 function renderNotas(evaluaciones) {
   notasContainer.innerHTML = '';
+  currentEvaluaciones = evaluaciones;
 
   if (!evaluaciones.length) {
     notasContainer.innerHTML = '<p style="text-align:center;color:var(--text-soft);padding:2rem;">Aún no hay evaluaciones registradas.</p>';
@@ -615,60 +617,16 @@ function renderNotas(evaluaciones) {
     const promedioColor = promedio !== null ? getNotaColor(promedio) : '#a0aec0';
 
     let rowsHTML = '';
-    evals.forEach((ev, index) => {
+    evals.forEach(ev => {
+      // Find global index
+      const globalIdx = currentEvaluaciones.findIndex(e => e.id === ev.id);
       const nota = ev.nota;
       const color = getNotaColor(nota);
       const fechaFmt = formatFecha(ev.fecha);
       const isDirecta = ev.total_max === -1;
-      
-      const nivel = getNivelLogro(nota);
-      const ringData = buildScoreRing(nota, color);
-      const indicHTML = buildRubricaTable(ev.indicadores || []);
-
-      // Feedback
-      const r = ev.retroalimentacion;
-      const tieneRetro = r && (r.punto_fuerte || r.desafio || r.sugerencia);
-      const pf = tieneRetro ? (r.punto_fuerte || '') : '';
-      const dp = tieneRetro ? (r.desafio      || '') : '';
-      const sa = tieneRetro ? (r.sugerencia   || '') : '';
-
-      const feedbackHTML = tieneRetro ? `
-        <div class="retro-blocks" style="margin-top: 20px;">
-          ${pf ? `
-          <div class="retro-block pf">
-            <div class="retro-block-icon-wrap">🌟</div>
-            <div>
-              <p class="retro-block-label">Punto Fuerte</p>
-              <p class="retro-block-text">${escHtml(pf)}</p>
-            </div>
-          </div>` : ''}
-          ${dp ? `
-          <div class="retro-block dp">
-            <div class="retro-block-icon-wrap">🔶</div>
-            <div>
-              <p class="retro-block-label">Desafío Principal</p>
-              <p class="retro-block-text">${escHtml(dp)}</p>
-            </div>
-          </div>` : ''}
-          ${sa ? `
-          <div class="retro-block sa">
-            <div class="retro-block-icon-wrap">💡</div>
-            <div>
-              <p class="retro-block-label">Sugerencia Accionable</p>
-              <p class="retro-block-text">${escHtml(sa)}</p>
-            </div>
-          </div>` : ''}
-        </div>` : `
-        <div class="retro-pending" style="margin-top: 20px;">
-          <div class="retro-pending-icon">⏳</div>
-          <div>
-            <p class="retro-pending-title">Retroalimentación en preparación</p>
-            <p class="retro-pending-text">El profesor está elaborando la retroalimentación personalizada para esta evaluación.</p>
-          </div>
-        </div>`;
 
       rowsHTML += `
-        <tr class="notas-row" onclick="this.nextElementSibling.classList.toggle('expanded'); this.classList.toggle('expanded');" tabindex="0" role="button">
+        <tr class="notas-row" onclick="openRubricModal(${globalIdx})" tabindex="0" role="button">
           <td class="notas-td-name">
             <div style="display:flex; align-items:center; gap:6px;">
               <span class="notas-ev-name">${escHtml(ev.nombre)}</span>
@@ -681,19 +639,7 @@ function renderNotas(evaluaciones) {
             <div class="notas-td-nota-inner">
               <span class="notas-nota-dot" style="background:${color}"></span>
               <span class="notas-nota-value" style="color:${color}">${nota !== null ? nota.toFixed(1) : '—'}</span>
-              <svg class="row-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-            </div>
-          </td>
-        </tr>
-        <tr class="notas-row-detail">
-          <td colspan="4" class="notas-detail-td">
-            <div class="notas-detail-content">
-              ${isDirecta ? '' : ''}
-              
-              <div class="rubrica-section" style="${isDirecta ? 'padding-top:0;' : ''}">
-                ${isDirecta ? '<p style="color:var(--text-soft); font-size:14px; text-align:center; padding:10px 0;">Esta nota fue ingresada directamente sin una rúbrica asociada.</p>' : indicHTML}
-                ${!isDirecta ? feedbackHTML : ''}
-              </div>
+              <svg class="row-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
             </div>
           </td>
         </tr>
@@ -748,19 +694,102 @@ function renderNotas(evaluaciones) {
   }
 
   notasContainer.innerHTML = html;
-
-  // Animar score rings en los detalles
-  requestAnimationFrame(() => {
-    document.querySelectorAll('.score-ring-fill').forEach(ring => {
-      const targetOffset = ring.dataset.targetOffset;
-      if (targetOffset !== undefined) {
-        setTimeout(() => {
-          ring.style.strokeDashoffset = targetOffset;
-        }, 100);
-      }
-    });
-  });
 }
+
+// ─────────────────────────────────────────────
+// MODAL DE RÚBRICA
+// ─────────────────────────────────────────────
+function openRubricModal(globalIdx) {
+  const ev = currentEvaluaciones[globalIdx];
+  if (!ev) return;
+
+  const isDirecta = ev.total_max === -1;
+  const indicHTML = buildRubricaTable(ev.indicadores || []);
+
+  const r = ev.retroalimentacion;
+  const tieneRetro = r && (r.punto_fuerte || r.desafio || r.sugerencia);
+  const pf = tieneRetro ? (r.punto_fuerte || '') : '';
+  const dp = tieneRetro ? (r.desafio      || '') : '';
+  const sa = tieneRetro ? (r.sugerencia   || '') : '';
+
+  const feedbackHTML = tieneRetro ? `
+    <div class="retro-blocks" style="margin-top: 20px;">
+      ${pf ? `
+      <div class="retro-block pf">
+        <div class="retro-block-icon-wrap">🌟</div>
+        <div>
+          <p class="retro-block-label">Punto Fuerte</p>
+          <p class="retro-block-text">${escHtml(pf)}</p>
+        </div>
+      </div>` : ''}
+      ${dp ? `
+      <div class="retro-block dp">
+        <div class="retro-block-icon-wrap">🔶</div>
+        <div>
+          <p class="retro-block-label">Desafío Principal</p>
+          <p class="retro-block-text">${escHtml(dp)}</p>
+        </div>
+      </div>` : ''}
+      ${sa ? `
+      <div class="retro-block sa">
+        <div class="retro-block-icon-wrap">💡</div>
+        <div>
+          <p class="retro-block-label">Sugerencia Accionable</p>
+          <p class="retro-block-text">${escHtml(sa)}</p>
+        </div>
+      </div>` : ''}
+    </div>` : `
+    <div class="retro-pending" style="margin-top: 20px;">
+      <div class="retro-pending-icon">⏳</div>
+      <div>
+        <p class="retro-pending-title">Retroalimentación en preparación</p>
+        <p class="retro-pending-text">El profesor está elaborando la retroalimentación personalizada para esta evaluación.</p>
+      </div>
+    </div>`;
+
+  const modalBody = document.getElementById('rubric-modal-body');
+  const modalTitle = document.getElementById('rubric-modal-title');
+  const modalDate = document.getElementById('rubric-modal-date');
+
+  modalTitle.textContent = ev.nombre;
+  modalDate.textContent = `📅 ${formatFecha(ev.fecha)} ${ev.descripcion ? '· ' + ev.descripcion : ''}`;
+
+  if (isDirecta) {
+    modalBody.innerHTML = `
+      <div style="text-align:center; padding:40px 20px;">
+        <div style="font-size:48px; margin-bottom:16px;">📝</div>
+        <h3 style="color:var(--text-main); margin-bottom:8px;">Nota ingresada directamente</h3>
+        <p style="color:var(--text-soft); max-width:400px; margin:0 auto; line-height:1.5;">Esta nota fue asignada por el docente sin utilizar una rúbrica detallada en la plataforma.</p>
+      </div>
+    `;
+  } else {
+    modalBody.innerHTML = `
+      <div class="rubrica-section" style="padding-top:0; margin-top:0; border-top:none;">
+        ${indicHTML}
+        ${feedbackHTML}
+      </div>
+    `;
+  }
+
+  const modal = document.getElementById('rubric-modal');
+  modal.classList.add('show');
+  document.body.style.overflow = 'hidden'; // prevent bg scroll
+}
+
+function closeRubricModal() {
+  const modal = document.getElementById('rubric-modal');
+  modal.classList.remove('show');
+  document.body.style.overflow = '';
+}
+
+// Close modal on click outside
+window.addEventListener('click', (e) => {
+  const modal = document.getElementById('rubric-modal');
+  if (e.target === modal) {
+    closeRubricModal();
+  }
+});
+
 // ─────────────────────────────────────────────
 // HELPERS — NIVEL DE LOGRO
 // ─────────────────────────────────────────────
